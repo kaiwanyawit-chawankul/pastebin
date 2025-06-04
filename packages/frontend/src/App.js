@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { createPaste, getPaste, getAllPastes } from './services/api';
 import {
   Copy,
   Eye,
-  EyeOff,
   Trash2,
   Plus,
   History,
@@ -11,7 +11,6 @@ import {
   Unlock,
   User,
   LogOut,
-  Settings,
   Calendar,
   FileText,
   Flame,
@@ -37,41 +36,32 @@ const PastebinService = () => {
   const [title, setTitle] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [burnAfterRead, setBurnAfterRead] = useState(false);
-  const [expiration, setExpiration] = useState('never');
+  const [expiration, setExpiration] = useState('5min'); // Changed from 'never' to '5min'
   const [language, setLanguage] = useState('text');
   const [pastes, setPastes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [selectedPaste, setSelectedPaste] = useState(null);
   const [notification, setNotification] = useState('');
 
-  // Initialize with some sample data
+  // Replace sample data with API call
   useEffect(() => {
-    const samplePastes = [
-      {
-        id: '1',
-        title: 'Sample Code',
-        content: 'console.log("Hello World!");',
-        language: 'javascript',
-        isPrivate: false,
-        burnAfterRead: false,
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-        views: 5,
-        expired: false,
-      },
-      {
-        id: '2',
-        title: 'Secret Note',
-        content: 'This is a private note',
-        language: 'text',
-        isPrivate: true,
-        burnAfterRead: true,
-        createdAt: new Date(Date.now() - 3600000).toISOString(),
-        views: 1,
-        expired: false,
-      },
-    ];
-    setPastes(samplePastes);
+    const loadPastes = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllPastes();
+        setPastes(data);
+      } catch (err) {
+        setError(err.message);
+        showNotification('Failed to load pastes');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPastes();
   }, []);
 
   const showNotification = (message) => {
@@ -93,61 +83,64 @@ const PastebinService = () => {
     }
   };
 
-  const createPaste = () => {
+  const handleCreatePaste = async () => {
     if (!content.trim()) {
       showNotification('Please enter some content');
       return;
     }
 
-    const newPaste = {
-      id: Date.now().toString(),
-      title: title || 'Untitled',
-      content,
-      language,
-      isPrivate,
-      burnAfterRead,
-      expiration,
-      createdAt: new Date().toISOString(),
-      views: 0,
-      expired: false,
-      author: isAuthenticated ? user.email : 'anonymous',
-    };
+    try {
+      const newPaste = {
+        title: title || 'Untitled',
+        content,
+        language,
+        isPrivate,
+        burnAfterRead,
+        expiration,
+        author: isAuthenticated ? user.email : 'anonymous',
+      };
 
-    setPastes((prev) => [newPaste, ...prev]);
+      const { id } = await createPaste(newPaste);
 
-    // Clear form
-    setContent('');
-    setTitle('');
-    setIsPrivate(false);
-    setBurnAfterRead(false);
-    setExpiration('never');
-    setLanguage('text');
+      // Clear form
+      setContent('');
+      setTitle('');
+      setIsPrivate(false);
+      setBurnAfterRead(false);
+      setExpiration('never');
+      setLanguage('text');
 
-    showNotification('Paste created successfully!');
-    setCurrentView('history');
+      showNotification('Paste created successfully!');
+      setCurrentView('history');
+
+      // Refresh pastes list
+      const pasteData = await getPaste(id);
+      setPastes((prev) => [pasteData, ...prev]);
+    } catch (error) {
+      showNotification('Failed to create paste');
+      console.error('Error creating paste:', error);
+    }
   };
 
-  const viewPaste = (paste) => {
+  const viewPaste = async (paste) => {
     if (paste.expired) {
       showNotification('This paste has expired');
       return;
     }
 
-    // Increment view count
-    setPastes((prev) =>
-      prev.map((p) => (p.id === paste.id ? { ...p, views: p.views + 1 } : p))
-    );
-
-    // Handle burn after read
-    if (paste.burnAfterRead && paste.views > 0) {
-      setPastes((prev) =>
-        prev.map((p) => (p.id === paste.id ? { ...p, expired: true } : p))
-      );
-      showNotification('This paste has been burned after reading');
+    try {
+      const pasteData = await getPaste(paste.id);
+      setSelectedPaste(pasteData);
+      setCurrentView('view');
+    } catch (error) {
+      if (error.message.includes('not found')) {
+        setPastes((prev) => prev.filter((p) => p.id !== paste.id));
+        showNotification('This paste has been burned or expired');
+      } else {
+        showNotification('Failed to fetch paste');
+      }
+      console.error('Error viewing paste:', error);
     }
-
-    setSelectedPaste(paste);
-    setCurrentView('view');
   };
 
   const deletePaste = (pasteId) => {
@@ -238,11 +231,12 @@ const PastebinService = () => {
                 onChange={(e) => setExpiration(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="never">Never</option>
+                <option value="5min">5 Minutes</option>
                 <option value="10min">10 Minutes</option>
                 <option value="1hour">1 Hour</option>
                 <option value="1day">1 Day</option>
                 <option value="1week">1 Week</option>
+                <option value="never">Never</option>
               </select>
             </div>
 
@@ -291,7 +285,7 @@ const PastebinService = () => {
 
           <div className="flex gap-4">
             <button
-              onClick={createPaste}
+              onClick={handleCreatePaste}
               className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
             >
               <Plus size={20} />
@@ -311,12 +305,22 @@ const PastebinService = () => {
     </div>
   );
 
+  // Update HistoryView to handle loading and error states
   const HistoryView = () => (
     <div className="max-w-6xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Paste History</h2>
 
-        {pastes.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-4 text-gray-500">Loading pastes...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 text-red-500">
+            <p>Error loading pastes: {error}</p>
+          </div>
+        ) : pastes.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <FileText size={48} className="mx-auto mb-4 opacity-50" />
             <p>No pastes yet. Create your first paste!</p>
