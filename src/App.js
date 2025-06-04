@@ -14,7 +14,7 @@ import {
   Settings,
   Calendar,
   FileText,
-  Flame
+  Flame,
 } from 'lucide-react';
 
 // Mock Auth0 service - Replace with real Auth0 integration
@@ -28,7 +28,7 @@ const mockAuth = {
   logout: () => {
     mockAuth.isAuthenticated = false;
     mockAuth.user = null;
-  }
+  },
 };
 
 const PastebinService = () => {
@@ -57,7 +57,7 @@ const PastebinService = () => {
         burnAfterRead: false,
         createdAt: new Date(Date.now() - 86400000).toISOString(),
         views: 5,
-        expired: false
+        expired: false,
       },
       {
         id: '2',
@@ -68,8 +68,8 @@ const PastebinService = () => {
         burnAfterRead: true,
         createdAt: new Date(Date.now() - 3600000).toISOString(),
         views: 1,
-        expired: false
-      }
+        expired: false,
+      },
     ];
     setPastes(samplePastes);
   }, []);
@@ -110,10 +110,10 @@ const PastebinService = () => {
       createdAt: new Date().toISOString(),
       views: 0,
       expired: false,
-      author: isAuthenticated ? user.email : 'anonymous'
+      author: isAuthenticated ? user.email : 'anonymous',
     };
 
-    setPastes(prev => [newPaste, ...prev]);
+    setPastes((prev) => [newPaste, ...prev]);
 
     // Clear form
     setContent('');
@@ -134,15 +134,15 @@ const PastebinService = () => {
     }
 
     // Increment view count
-    setPastes(prev => prev.map(p =>
-      p.id === paste.id ? { ...p, views: p.views + 1 } : p
-    ));
+    setPastes((prev) =>
+      prev.map((p) => (p.id === paste.id ? { ...p, views: p.views + 1 } : p))
+    );
 
     // Handle burn after read
     if (paste.burnAfterRead && paste.views > 0) {
-      setPastes(prev => prev.map(p =>
-        p.id === paste.id ? { ...p, expired: true } : p
-      ));
+      setPastes((prev) =>
+        prev.map((p) => (p.id === paste.id ? { ...p, expired: true } : p))
+      );
       showNotification('This paste has been burned after reading');
     }
 
@@ -151,7 +151,7 @@ const PastebinService = () => {
   };
 
   const deletePaste = (pasteId) => {
-    setPastes(prev => prev.filter(p => p.id !== pasteId));
+    setPastes((prev) => prev.filter((p) => p.id !== pasteId));
     showNotification('Paste deleted');
   };
 
@@ -184,14 +184,16 @@ const PastebinService = () => {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
   const CreateView = () => (
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Create New Paste</h2>
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">
+          Create New Paste
+        </h2>
 
         <div className="space-y-4">
           <div>
@@ -254,7 +256,11 @@ const PastebinService = () => {
                     className="mr-2"
                   />
                   <span className="text-sm text-gray-700">Private</span>
-                  {isPrivate ? <Lock size={16} className="ml-1 text-gray-500" /> : <Unlock size={16} className="ml-1 text-gray-500" />}
+                  {isPrivate ? (
+                    <Lock size={16} className="ml-1 text-gray-500" />
+                  ) : (
+                    <Unlock size={16} className="ml-1 text-gray-500" />
+                  )}
                 </label>
 
                 <label className="flex items-center">
@@ -327,10 +333,20 @@ const PastebinService = () => {
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold text-gray-800">{paste.title}</h3>
-                      {paste.isPrivate && <Lock size={16} className="text-gray-500" />}
-                      {paste.burnAfterRead && <Flame size={16} className="text-red-500" />}
-                      {paste.expired && <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">EXPIRED</span>}
+                      <h3 className="font-semibold text-gray-800">
+                        {paste.title}
+                      </h3>
+                      {paste.isPrivate && (
+                        <Lock size={16} className="text-gray-500" />
+                      )}
+                      {paste.burnAfterRead && (
+                        <Flame size={16} className="text-red-500" />
+                      )}
+                      {paste.expired && (
+                        <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
+                          EXPIRED
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
@@ -393,7 +409,9 @@ const PastebinService = () => {
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">{selectedPaste.title}</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              {selectedPaste.title}
+            </h2>
             <div className="flex items-center gap-4 text-sm text-gray-600 mt-2">
               <span className="flex items-center gap-1">
                 <Calendar size={14} />
