@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Copy, 
-  Eye, 
-  EyeOff, 
-  Trash2, 
-  Plus, 
-  History, 
-  Share2, 
-  Lock, 
+import {
+  Copy,
+  Eye,
+  EyeOff,
+  Trash2,
+  Plus,
+  History,
+  Share2,
+  Lock,
   Unlock,
   User,
   LogOut,
@@ -114,7 +114,7 @@ const PastebinService = () => {
     };
 
     setPastes(prev => [newPaste, ...prev]);
-    
+
     // Clear form
     setContent('');
     setTitle('');
@@ -122,7 +122,7 @@ const PastebinService = () => {
     setBurnAfterRead(false);
     setExpiration('never');
     setLanguage('text');
-    
+
     showNotification('Paste created successfully!');
     setCurrentView('history');
   };
@@ -134,13 +134,13 @@ const PastebinService = () => {
     }
 
     // Increment view count
-    setPastes(prev => prev.map(p => 
+    setPastes(prev => prev.map(p =>
       p.id === paste.id ? { ...p, views: p.views + 1 } : p
     ));
 
     // Handle burn after read
     if (paste.burnAfterRead && paste.views > 0) {
-      setPastes(prev => prev.map(p => 
+      setPastes(prev => prev.map(p =>
         p.id === paste.id ? { ...p, expired: true } : p
       ));
       showNotification('This paste has been burned after reading');
@@ -192,7 +192,7 @@ const PastebinService = () => {
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Create New Paste</h2>
-        
+
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -256,7 +256,7 @@ const PastebinService = () => {
                   <span className="text-sm text-gray-700">Private</span>
                   {isPrivate ? <Lock size={16} className="ml-1 text-gray-500" /> : <Unlock size={16} className="ml-1 text-gray-500" />}
                 </label>
-                
+
                 <label className="flex items-center">
                   <input
                     type="checkbox"
@@ -291,7 +291,7 @@ const PastebinService = () => {
               <Plus size={20} />
               Create Paste
             </button>
-            
+
             <button
               onClick={clearClipboard}
               className="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700 transition-colors flex items-center gap-2"
@@ -309,7 +309,7 @@ const PastebinService = () => {
     <div className="max-w-6xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Paste History</h2>
-        
+
         {pastes.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <FileText size={48} className="mx-auto mb-4 opacity-50" />
@@ -332,7 +332,7 @@ const PastebinService = () => {
                       {paste.burnAfterRead && <Flame size={16} className="text-red-500" />}
                       {paste.expired && <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">EXPIRED</span>}
                     </div>
-                    
+
                     <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
                       <span className="flex items-center gap-1">
                         <Calendar size={14} />
@@ -346,12 +346,12 @@ const PastebinService = () => {
                         {paste.language}
                       </span>
                     </div>
-                    
+
                     <p className="text-gray-600 text-sm truncate">
                       {paste.content.substring(0, 100)}...
                     </p>
                   </div>
-                  
+
                   <div className="flex gap-2 ml-4">
                     <button
                       onClick={() => viewPaste(paste)}
@@ -361,7 +361,7 @@ const PastebinService = () => {
                     >
                       <Eye size={16} />
                     </button>
-                    
+
                     <button
                       onClick={() => shareUrl(paste.id)}
                       disabled={paste.isPrivate || paste.expired}
@@ -370,7 +370,7 @@ const PastebinService = () => {
                     >
                       <Share2 size={16} />
                     </button>
-                    
+
                     <button
                       onClick={() => deletePaste(paste.id)}
                       className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded"
@@ -420,7 +420,7 @@ const PastebinService = () => {
               )}
             </div>
           </div>
-          
+
           <div className="flex gap-2">
             <button
               onClick={() => copyToClipboard(selectedPaste.content)}
@@ -429,7 +429,7 @@ const PastebinService = () => {
               <Copy size={16} />
               Copy
             </button>
-            
+
             <button
               onClick={() => setCurrentView('history')}
               className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
@@ -438,7 +438,7 @@ const PastebinService = () => {
             </button>
           </div>
         </div>
-        
+
         <div className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-auto">
           <pre className="text-sm font-mono whitespace-pre-wrap">
             {selectedPaste.content}
@@ -460,20 +460,20 @@ const PastebinService = () => {
                 <button
                   onClick={() => setCurrentView('create')}
                   className={`px-4 py-2 rounded-md transition-colors flex items-center gap-2 ${
-                    currentView === 'create' 
-                      ? 'bg-blue-100 text-blue-700' 
+                    currentView === 'create'
+                      ? 'bg-blue-100 text-blue-700'
                       : 'text-gray-600 hover:text-blue-600'
                   }`}
                 >
                   <Plus size={18} />
                   Create
                 </button>
-                
+
                 <button
                   onClick={() => setCurrentView('history')}
                   className={`px-4 py-2 rounded-md transition-colors flex items-center gap-2 ${
-                    currentView === 'history' 
-                      ? 'bg-blue-100 text-blue-700' 
+                    currentView === 'history'
+                      ? 'bg-blue-100 text-blue-700'
                       : 'text-gray-600 hover:text-blue-600'
                   }`}
                 >
@@ -482,7 +482,7 @@ const PastebinService = () => {
                 </button>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-4">
               {isAuthenticated && (
                 <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -490,7 +490,7 @@ const PastebinService = () => {
                   {user.name}
                 </div>
               )}
-              
+
               <button
                 onClick={handleAuth}
                 className={`px-4 py-2 rounded-md transition-colors flex items-center gap-2 ${
@@ -533,46 +533,4 @@ const PastebinService = () => {
   );
 };
 
-export default PastebinService;`
-    },
-    {
-      `path`: `tailwind.config.js`,
-      `content`: `/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-        },
-      },
-      animation: {
-        'slide-in': 'slideIn 0.3s ease-out',
-        'fade-in': 'fadeIn 0.2s ease-in',
-      },
-      keyframes: {
-        slideIn: {
-          '0%': { opacity: '0', transform: 'translateX(100%)' },
-          '100%': { opacity: '1', transform: 'translateX(0)' },
-        },
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-      },
-    },
-  },
-  plugins: [],
-}
+export default PastebinService;
