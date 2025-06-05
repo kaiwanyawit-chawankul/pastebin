@@ -7,8 +7,10 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
+    "start": "turbo run start",
     "lint": "turbo run lint",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "vercel-build": "turbo run build"
   },
   "devDependencies": {
     "turbo": "^1.0.0",

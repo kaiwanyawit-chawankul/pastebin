@@ -176,13 +176,15 @@ app.delete('/api/pastes/:id', async (req, res) => {
 });
 
 // Initialize schema before starting the server
-const PORT = process.env.PORT || 3001;
-
 initializeSchema()
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+    // Only listen if not being imported
+    if (import.meta.url === `file://${process.argv[1]}`) {
+      const PORT = process.env.PORT || 3001;
+      app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+      });
+    }
   })
   .catch(error => {
     console.error('Failed to start server:', error);
@@ -194,3 +196,6 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something broke!' });
 });
+
+// Export for Vercel
+export default app;
