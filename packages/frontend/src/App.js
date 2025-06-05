@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { createPaste, getPaste, getAllPastes } from './services/api';
+import {
+  createPaste,
+  getPaste,
+  getAllPastes,
+  deletePaste,
+} from './services/api';
 import {
   Copy,
   Eye,
@@ -143,9 +148,15 @@ const PastebinService = () => {
     }
   };
 
-  const deletePaste = (pasteId) => {
-    setPastes((prev) => prev.filter((p) => p.id !== pasteId));
-    showNotification('Paste deleted');
+  const deletePasteById = async (id) => {
+    try {
+      await deletePaste(id);
+      setPastes((prev) => prev.filter((paste) => paste.id !== id));
+      showNotification('Paste deleted successfully');
+    } catch (error) {
+      showNotification(error.message || 'Failed to delete paste');
+      console.error('Error deleting paste:', error);
+    }
   };
 
   const copyToClipboard = async (text) => {
@@ -392,7 +403,7 @@ const PastebinService = () => {
                     </button>
 
                     <button
-                      onClick={() => deletePaste(paste.id)}
+                      onClick={() => deletePasteById(paste.id)}
                       className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded"
                       title="Delete"
                     >

@@ -145,6 +145,36 @@ app.get('/api/pastes', async (req, res) => {
   }
 });
 
+// Delete paste by ID
+app.delete('/api/pastes/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if paste exists
+    const [paste] = await sql`
+      SELECT id FROM pastes
+      WHERE id = ${id}
+        AND NOT deleted
+    `;
+
+    if (!paste) {
+      return res.status(404).json({ error: 'Paste not found' });
+    }
+
+    // Soft delete the paste
+    await sql`
+      UPDATE pastes
+      SET deleted = true
+      WHERE id = ${id}
+    `;
+
+    res.status(200).json({ message: 'Paste deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting paste:', error);
+    res.status(500).json({ error: 'Failed to delete paste' });
+  }
+});
+
 // Initialize schema before starting the server
 const PORT = process.env.PORT || 3001;
 

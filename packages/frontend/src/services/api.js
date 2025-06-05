@@ -45,6 +45,21 @@ export const getAllPastes = async () => {
   return response.json();
 };
 
+export const deletePaste = async (id) => {
+  const response = await fetch(`${API_URL}/pastes/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error('Paste not found');
+    }
+    throw new Error('Failed to delete paste');
+  }
+
+  return response.json();
+};
+
 const getExpirationTime = (expiration) => {
   switch (expiration) {
     case '5min':
